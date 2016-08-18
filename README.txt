@@ -1,14 +1,15 @@
 Copyright (c) 2016 Alex Kramer <kramer.alex.kramer@gmail.com>
 See the LICENSE.txt file at the top-level of this distribution.
 
+THIS IS BETA SOFTWARE. FEATURES and FUNCTIONALITY ARE SUBJECT TO CHANGE WITHOUT
+PRIOR NOTICE.
+
 Description
 ===========
-Test of single-dimensional flux-based method for extracting momentum
-distributions from wavepackets in time-dependent quantum mechanical
+Implementation of a multi-dimensional flux-based method for extracting momentum
+distributions from traveling wavepackets in time-dependent quantum mechanical
 calculations. Both a semi-classical method and a method incorporating
-first-order quantum corrections are implemented. Tests are done using the
-free-particle propagation of a Gaussian wavepacket and the extracted momentum
-spectra are compared with the analytically known results.
+first-order quantum corrections are implemented.
 
 Example usage
 =============
@@ -22,22 +23,33 @@ will have five updated files present:
 
 * run.inp: Copy of input file
 * run.log: Runtime logging
-* vd_px.dat: Extracted momentum spectrum
-* vd_resid.dat: Expected momentum spectrum, residuals of momentum spectrum, and
-  cumulative residuals of momentum spectrum
-* vd_resid_analysis.txt: Basic statistical analysis of results
+* vd_p.dat: Extracted momentum spectrum
+
+[TODO]
+* Time-dependent output of wavefunction
+* Normalization checks
 
 Required dependencies
 =====================
-* Fortran compiler (most recently tested on GNU Fortran 5.3)
-* SCons (most recently tested on SCons 2.4)
+Software to install:
+
+* Fortran compiler (most recently tested on GNU Fortran 6.1)
+* SCons (most recently tested on SCons 2.5)
+
+External libraries to build from source (build scripts included):
 
 * Fortran generics library, available at:
   https://github.com/kramer314/fortran-lib
   Note that this library is still in beta status, so the API is technically
   still in flux. Always use the most recent version.
 
+* Fortran tridiagonal matrix library, available at:
+  https://github.com/kramer314/tridiag
+  Note that this library is still in beta status; always use the latest
+  version.
+
 Recommended Dependencies
+========================
 * OpenMP library (most recently tested on GCC OpenMP 5.3)
 
 Basic setup
@@ -45,29 +57,25 @@ Basic setup
 The following will download and build this program and its library
 dependencies:
 
-    git clone https://github.com/kramer314/1d-vd-test.git
-    cd ./1d-vd-test/
-    ./build-deps.sh
+    git clone https://github.com/kramer314/vd-2d-tdse.git
+    cd ./vd-2d-tdse/
+    ./make-deps.sh
     scons
 
 Manual setup
 ============
 Distribution of Fortran libraries is pretty nasty until submodules from F2015
 are supported. What the `./build-deps.sh` script does is clone the Fortran
-generics library project that this program uses into the directory `deps/`
-and then builds it into the folder `deps/fortran-lib/build/`. You can have
-this generics library project at some other location; you just need to build
-the library as normal and create a symlink as follows:
+generics library and tridiagonal matrix library projects that this program uses
+into the directory `deps/` and then builds it into the folder
+`deps/[lib-name]/build/`. You can have this generics library project at some
+other location; you just need to build the library as normal and create
+symlinks as follows:
 
     ln -s /path/to/fortran-lib-project ./deps/fortran-lib
+    ln -s /path/to/tridiag-matrix-project ./deps/tridiag
 
-This is a link to the project directory itself, not the directory where the
-compiled library is actually located. Right now, the build script adds the
-path `./deps/fortran-lib/build` to the compiler path. This may change.
-
-Notes on `convergence-tests` directory
-======================================
-This is a collection of scripts that systematically batch together and run a
-large number of simulations in parallel to test convergence sensitivity to grid
-sizes. These are fairly hacked together, and use notation that isn't
-documented anywhere but private notes.
+Note that this is a link to the project directory itself, *not* the directory
+where the build folder where the compiled library is actually located. These
+symlinks are necessary because the build script for this program automatically
+adds the paths x`./deps/[lib-name]/buiild` to the compiler path for linking.

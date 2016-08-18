@@ -2,7 +2,13 @@
 # See the LICENSE.txt file at the top-level directory of this distribution.
 
 import os
-abspath = os.path.abspath
+
+# Uncomment to have SCons handle updating and building dependencies as well.
+# if GetOption("clean"):
+#     os.system("./make_deps.sh --clean")
+# else:
+#     n_jobs = GetOption("num_jobs")
+#     os.system("./make_deps.sh -j " + str(n_jobs))
 
 def absdir(path):
     return os.path.abspath(path) + "/"
@@ -13,8 +19,7 @@ build_dir = root_dir + "build/"
 deps_dir = root_dir + "deps/"
 
 libs = ["flib", "tridiag"]
-lib_path = [absdir(deps_dir + "fortran-lib/build/"),
-  absdir(deps_dir + "tridiag/build/")]
+lib_path = [deps_dir + "fortran-lib/build/", deps_dir + "tridiag/build"]
 
 env = DefaultEnvironment(ENV = os.environ, TOOLS = ['default', "gfortran"])
 

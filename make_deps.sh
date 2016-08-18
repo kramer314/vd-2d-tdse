@@ -8,51 +8,71 @@ tridiagdir=${depsdir}"tridiag/"
 
 threads=1
 
+
 function usage {
-    echo "Usage: make_deps [[-c | --clean] | [-h | --help]] |"\
-	 "[-j | --jobs [N] ]]"
+    # Displays usage and arguments
+    echo ""
+    echo "make_deps [[-c | --clean] | [-h | --help]] | [-j | --jobs [N] ]]"
     echo ""
     echo "--clean: removes dependency source and build subdirectories."
     echo "--help: print this usage statement"
     echo ""
     echo "--jobs: number of build threads"
     echo ""
-    echo "If no arguments are specified, dependencies will be updated"\
-	 "and built in serial."
+    echo "If no arguments are specified, dependencies will be updated and"\
+	 "built in serial."
+    echo ""
 }
+
 
 function clean {
-    echo "Removing dependency subdirectories."
+    # Removes dependency source and builds
     rm -rf $depsdir
+    echo ""
+    echo "All subdirectories associated with dependencies removed."
+    echo ""
 }
 
+
 function build {
-    echo "Building dependencies."
+    # Gets and builds up-to-date dependencies
+    echo "=================================="
+    echo "Updating and building dependencies"
+    echo "=================================="
+    echo ""
+
     mkdir -p $depsdir
 
     # Pull and build generic Fortran helper library
-    echo "Updating generic Fortran helper library source."
-    echo "-----------------------------------------------"
-    git clone https://github.com/kramer314/fortran-lib.git $flibdir
+    echo "Updating generic Fortran helper library source"
+    echo "----------------------------------------------"
+    git -C $flibdir pull origin master || git clone https://github.com/kramer314/fortran-lib.git $flibdir
+    echo ""
+
+    echo "Building generic Fortran helper library"
+    echo "---------------------------------------"
     pushd $flibdir > $devnull
-    git pull origin master
-    echo "Building generic Fortran helper library."
-    echo "----------------------------------------"
-    echo $threads
-    scons -j${threads}
+    scons -j ${threads}
     popd > $devnull
+    echo ""
 
     # Pull and build tridiagonal matrix library
-    echo "Updating tridiagonal matrix library source."
-    echo "-------------------------------------------"
-    git clone https://github.com/kramer314/tridiag.git $tridiagdir
+    echo "Updating tridiagonal matrix library source"
+    echo "------------------------------------------"
+    git -C $tridiagdir pull origin master || git clone https://github.com/kramer314/tridiag.git $tridiagdir
+    echo ""
+
+    echo "Building tridiagonal matrix library"
+    echo "-----------------------------------"
     pushd $tridiagdir > $devnull
-    git pull origin master
-    echo "Building tridiagonal matrix library."
-    echo "------------------------------------"
-    scons -j$threads
+    scons -j $threads
     popd > $devnull
+    echo ""
+
+    echo "Dependency build complete; check log above for any build errors."
+    echo ""
 }
+
 
 # Parse arguments
 if [ -z "$1" ]; then

@@ -4,16 +4,13 @@ module propagate_cn2d
   use precision, only: fp, ip, fp_eps
 
   use potential, only: potential_xyt
-  !  use tridiag, only: tridiag_cnst
-  !use tridiag, only: tridiag_cnst
-  use tridiag
+  use tridiag, only: tridiag_sym_cnst, tridiag_sym_cnst_odiag
 
   implicit none
 
   private
 
-  complex(dp), allocatable :: exp_pot_arr(:,:)
-  complex(dp), allocatable :: old_pot_arr(:,:)
+  complex(dp), allocatable :: diag_arr_y(:)
 
   complex(dp), allocatable :: phi_arr_x(:), phi_arr_y(:)
   complex(dp), allocatable :: psi_arr_x(:), psi_arr_y(:)
@@ -26,16 +23,16 @@ module propagate_cn2d
   complex(fp) :: sym_cnst_y_dt, sym_cnst_y_dt_2
   complex(fp) :: diag_cnst_x_dt, diag_cnst_x_dt_2
   complex(fp) :: diag_cnst_y_dt, diag_cnst_y_dt_2
+  complex(fp) :: diag_cnst_vy_dt
 
   public :: propagate_cn2d_init
   public :: propagate_cn2d_cleanup
-  public :: propagate_cn2d_calc_pot
   public :: propagate_cn2d_splitop
 
 contains
   subroutine propagate_cn2d_init()
     integer(ip) :: i_x, i_y
-    
+
     sym_cnst_dt = - (j * hbar**2 * dt) / (8.0_fp * m)
     sym_cnst_dt_2 = sym_cnst_dt / 2.0_fp
 
@@ -51,60 +48,27 @@ contains
     diag_cnst_y_dt = (0.5_fp - 2.0_dp * sym_cnst_y_dt)
     diag_cnst_y_dt_2 = (0.5_fp - 2.0_dp * sym_cnst_y_dt_2)
 
-    allocate(phi_arr_x(nx), phi_arr_y(ny))
-    allocate(psi_arr_x(nx), psi_arr_y(ny))    
+    diag_cnst_vy_dt = j * dt / 4.0_fp
 
-    allocate(old_pot_arr(nx, ny))
-    allocate(exp_pot_arr(nx, ny))
+    allocate(phi_arr_x(nx), phi_arr_y(ny))
+    allocate(psi_arr_x(nx), psi_arr_y(ny))
+
+    allocate(diag_arr_y(ny))
 
     allocate(mat_coeff_arr_x(nx - 1))
     allocate(mat_coeff_arr_y(ny - 1))
     allocate(vec_coeff_arr_x(nx))
     allocate(vec_coeff_arr_y(ny))
 
-    !$omp parallel do private(i_x, i_y)
-    do i_y = 1, ny
-       do i_x = 1, nx
-          old_pot_arr(i_x, i_y) = 0.0_fp
-          exp_pot_arr(i_x, i_y) = exp(-j * 0.0_fp * dt)
-       end do
-    end do
-    !$omp end parallel do
-
   end subroutine propagate_cn2d_init
 
   subroutine propagate_cn2d_cleanup()
     deallocate(phi_arr_x, phi_arr_y)
-    deallocate(psi_arr_x, psi_arr_y)    
-    deallocate(old_pot_arr, exp_pot_arr)
+    deallocate(psi_arr_x, psi_arr_y)
+    deallocate(diag_arr_y)
     deallocate(mat_coeff_arr_x, mat_coeff_arr_y)
     deallocate(vec_coeff_arr_x, vec_coeff_arr_y)
   end subroutine propagate_cn2d_cleanup
-
-  ! Calculate potential along x direction for fixed i_y)
-  subroutine propagate_cn2d_calc_pot(i_t)
-    integer(ip), intent(in) :: i_t
-
-    integer(ip) :: i_x, i_y
-    complex(fp) :: pot_xyt
-
-    !$omp parallel do private(i_x, i_y, pot_xyt)
-    do i_y = 1, ny
-       do i_x = 1, nx
-          pot_xyt = potential_xyt(i_x, i_y, i_t)
-
-          ! Calculating exp(-j V dt) is expensive, we should only update it as needed
-          ! TODO: Test if absolute epsilons are what we should use
-          if (abs(pot_xyt - old_pot_arr(i_x, i_y)) .gt. fp_eps) then
-             exp_pot_arr(i_x, i_y) = exp(-j * pot_xyt * dt)
-             old_pot_arr(i_x, i_y) = pot_xyt
-          end if
-
-       end do
-    end do
-    !$omp end parallel do
-
-  end subroutine propagate_cn2d_calc_pot
 
   subroutine propagate_cn2d_splitop(psi_arr, i_t)
     complex(dp), intent(inout) :: psi_arr(:,:)
@@ -119,7 +83,7 @@ contains
        psi_arr_x(:) = psi_arr(:, i_y)
        call tridiag_sym_cnst(diag_cnst_x_dt_2, sym_cnst_x_dt_2, &
             psi_arr_x, mat_coeff_arr_x, vec_coeff_arr_x, &
-            phi_arr_x)       
+            phi_arr_x)
        ! call tridiag_cnst(diag_cnst_x_dt_2, sym_cnst_x_dt_2, &
        !      sym_cnst_x_dt_2, psi_arr_x, mat_coeff_arr_x, vec_coeff_arr_x, &
        !      phi_arr_x)
@@ -127,25 +91,18 @@ contains
     end do
     !$omp end parallel do
 
-    ! Propagate dt using V
-    call propagate_cn2d_calc_pot(i_t)
-    !$omp parallel do private(i_x, i_y)
-    do i_y = 1, ny
-       do i_x = 1, nx
-          psi_arr(i_x, i_y) = exp_pot_arr(i_x, i_y) * psi_arr(i_x, i_y)
-       end do
-    end do
-    !$omp end parallel do
-
-    ! Propagate dt using T_y for each x
+    ! Propagate dt using T_y + V for each x
     !$omp parallel do &
-    !$omp private(i_x, psi_arr_y, phi_arr_y, mat_coeff_arr_y, vec_coeff_arr_y)
+    !$omp private(i_x, psi_arr_y, phi_arr_y, mat_coeff_arr_y, vec_coeff_arr_y, diag_arr_y)
     do i_x = 1, nx
        psi_arr_y(:) = psi_arr(i_x, :)
-       call tridiag_sym_cnst(diag_cnst_y_dt, sym_cnst_y_dt, psi_arr_y, &
-            mat_coeff_arr_y, vec_coefF_arr_y, phi_arr_y)
-       ! call tridiag_cnst(diag_cnst_y_dt, sym_cnst_y_dt, sym_cnst_y_dt, &
-       !      psi_arr_y, mat_coeff_arr_y, vec_coeff_arr_y, phi_arr_y)
+
+       do i_y = 1, ny
+          diag_arr_y(i_y) = diag_cnst_y_dt + diag_cnst_vy_dt * potential_xyt(i_x, i_y, i_t)
+       end do
+
+       call tridiag_sym_cnst_odiag(diag_arr_y, sym_cnst_y_dt, psi_arr_y, &
+            mat_coeff_arr_y, vec_coeff_arr_y, phi_arr_y)
        psi_arr(i_x, :) = phi_arr_y(:) - psi_arr(i_x, :)
     end do
     !$omp end parallel do
@@ -163,7 +120,7 @@ contains
        !      phi_arr_x)
        psi_arr(:, i_y) = phi_arr_x(:) - psi_arr(:, i_y)
     end do
-    !$omp end parallel do    
+    !$omp end parallel do
 
   end subroutine propagate_cn2d_splitop
 

@@ -18,8 +18,8 @@ source_dir = root_dir + "src/"
 build_dir = root_dir + "build/"
 deps_dir = root_dir + "deps/"
 
-libs = ["flib", "tridiag"]
-lib_path = [deps_dir + "fortran-lib/build/", deps_dir + "tridiag/build"]
+libs = ["flib", "tridiag", "wfmath"]
+lib_path = [deps_dir + "fortran-lib/build/", deps_dir + "tridiag/build", deps_dir + "wfmath/build"]
 
 env = DefaultEnvironment(ENV = os.environ, TOOLS = ['default', "gfortran"])
 
@@ -28,7 +28,7 @@ general_flags = "-frecursive "
 openmp_flags = "-fopenmp "
 debug_flags = "-Og -g3 -Wall -Wextra -Wconversion -Wunused-parameter " + \
     "-pedantic -std=f2008 -fcheck=all -fbacktrace "
-prod_flags = "-O3 -march=native "
+prod_flags = "-O3 -march=native -fexternal-blas -lblas "
 
 flags = general_flags + IEEE_flags + openmp_flags + debug_flags
 flags = general_flags + IEEE_flags + openmp_flags + prod_flags

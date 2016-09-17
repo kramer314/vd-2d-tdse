@@ -5,6 +5,7 @@ devnull="/dev/null"
 depsdir="./deps/"
 flibdir=${depsdir}"fortran-lib/"
 tridiagdir=${depsdir}"tridiag/"
+wfmathdir=${depsdir}"wfmath/"
 
 threads=1
 
@@ -69,8 +70,22 @@ function build {
     popd > $devnull
     echo ""
 
+    # Pull and build wavefunction math library
+    echo "Updating wavefunction math library source"
+    echo "-----------------------------------------"
+    git -C $wfmathdir pull origin master || git clone https://github.com/kramer314/wfmath.git $wfmathdir
+    echo ""
+
+    echo "Building wavefunction math library"
+    echo "----------------------------------"
+    pushd $wfmathdir > $devnull
+    scons -j $threads
+    popd > $devnull
+    echo ""
+
     echo "Dependency build complete; check log above for any build errors."
     echo ""
+
 }
 
 

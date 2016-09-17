@@ -84,9 +84,6 @@ contains
        call tridiag_sym_cnst(diag_cnst_x_dt_2, sym_cnst_x_dt_2, &
             psi_arr_x, mat_coeff_arr_x, vec_coeff_arr_x, &
             phi_arr_x)
-       ! call tridiag_cnst(diag_cnst_x_dt_2, sym_cnst_x_dt_2, &
-       !      sym_cnst_x_dt_2, psi_arr_x, mat_coeff_arr_x, vec_coeff_arr_x, &
-       !      phi_arr_x)
        psi_arr(:, i_y) = phi_arr_x(:) - psi_arr(:, i_y)
     end do
     !$omp end parallel do
@@ -115,9 +112,6 @@ contains
        call tridiag_sym_cnst(diag_cnst_x_dt_2, sym_cnst_x_dt_2, &
             psi_arr_x, mat_coeff_arr_x, vec_coeff_arr_x, &
             phi_arr_x)
-       ! call tridiag_cnst(diag_cnst_x_dt_2, sym_cnst_x_dt_2, &
-       !      sym_cnst_x_dt_2, psi_arr_x, mat_coeff_arr_x, vec_coeff_arr_x, &
-       !      phi_arr_x)
        psi_arr(:, i_y) = phi_arr_x(:) - psi_arr(:, i_y)
     end do
     !$omp end parallel do

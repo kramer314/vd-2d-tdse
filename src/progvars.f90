@@ -35,6 +35,7 @@ module progvars
   real(fp) :: x_min, x_max, dx
   real(fp) :: y_min, y_max, dy
   integer(ip) :: nx, ny
+  real(fp) :: dgrid(2)
 
   ! Virtual detector object along x spatial grid
   type(vd_2d_manager_obj) :: vd_xy
@@ -92,7 +93,7 @@ module progvars
 
   ! Arrays
   real(fp), allocatable :: x_range(:), y_range(:), t_range(:)
-  complex(fp), allocatable :: psi_arr(:,:)
+  complex(fp), allocatable :: psi_arr(:,:), old_psi_arr(:,:)
 
   real(fp), allocatable :: theor_np_arr(:,:), resid_np_arr(:,:)
   real(fp), allocatable :: resid_np_cum_arr(:,:)
@@ -120,6 +121,7 @@ contains
     vd_yr_min = vd_xy%yr_min
     vd_yr_max = vd_xy%yr_max
 
+    dgrid = [dx, dy]
 
   end subroutine progvars_init
 
@@ -131,6 +133,8 @@ contains
 
   subroutine progvars_allocate_arrays()
     allocate(psi_arr(nx, ny))
+    allocate(old_psi_arr(nx, ny))
+    
     allocate(t_range(nt))
     allocate(x_range(nx))
     allocate(y_range(ny))
@@ -146,6 +150,7 @@ contains
     deallocate(y_range)
     deallocate(t_range)
     deallocate(psi_arr)
+    deallocate(old_psi_arr)
 
     deallocate(theor_np_arr)
     deallocate(resid_np_arr)

@@ -48,6 +48,11 @@ External libraries to build from source (build scripts included):
   Note that this library is still in beta status; always use the latest
   version.
 
+* Wavefunction math library, available at:
+  https://github.com/kramer314/wfmath
+  Note that this library is still in beta status; always use the latest
+  version.
+
 Recommended Dependencies
 ========================
 * OpenMP library (most recently tested on GCC OpenMP 5.3)
@@ -59,21 +64,25 @@ dependencies:
 
     git clone https://github.com/kramer314/vd-2d-tdse.git
     cd ./vd-2d-tdse/
-    ./make-deps.sh
-    scons
+    ./make-deps.sh -j [N]
+    scons -j [N]
+
+where ``[N]`` is the number of build threads (omit the ``-j`` flag to build
+everything in serial.
 
 Manual setup
 ============
 Distribution of Fortran libraries is pretty nasty until submodules from F2015
 are supported. What the `./build-deps.sh` script does is clone the Fortran
-generics library and tridiagonal matrix library projects that this program uses
-into the directory `deps/` and then builds it into the folder
+generics, tridiagonal matrix, and wavefunction math library projects that this
+program uses into the directory `deps/` and then builds it into the folder
 `deps/[lib-name]/build/`. You can have this generics library project at some
 other location; you just need to build the library as normal and create
 symlinks as follows:
 
     ln -s /path/to/fortran-lib-project ./deps/fortran-lib
     ln -s /path/to/tridiag-matrix-project ./deps/tridiag
+    ln -s /path/to/wfmath ./deps/wfmath
 
 Note that this is a link to the project directory itself, *not* the directory
 where the build folder where the compiled library is actually located. These

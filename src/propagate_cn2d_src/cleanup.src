@@ -1,0 +1,5 @@
+deallocate(phi_arr_x, phi_arr_y)
+deallocate(psi_arr_x, psi_arr_y)
+deallocate(diag_arr_y)
+deallocate(mat_coeff_arr_x, mat_coeff_arr_y)
+deallocate(vec_coeff_arr_x, vec_coeff_arr_y)

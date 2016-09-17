@@ -1,0 +1,6 @@
+use progvars
+
+use precision, only: fp, ip, fp_eps
+
+use potential, only: potential_xyt
+use tridiag, only: tridiag_sym_cnst, tridiag_sym_cnst_odiag

@@ -1,0 +1,41 @@
+integer(ip) :: i_x, i_y
+
+! Propagate dtau/2 using T_x for each y
+!$omp parallel do &
+!$omp private(i_y, psi_arr_x, phi_arr_x, mat_coeff_arr_x, vec_coeff_arr_x)
+do i_y = 1, ny
+   psi_arr_x(:) = psi_arr(:, i_y)
+   call tridiag_sym_cnst(diag_cnst_x_dtau_2, sym_cnst_x_dtau_2, &
+	psi_arr_x, mat_coeff_arr_x, vec_coeff_arr_x, &
+	phi_arr_x)
+   psi_arr(:, i_y) = phi_arr_x(:) - psi_arr(:, i_y)
+end do
+!$omp end parallel do
+
+! Propagate dtau using T_y + V for each x
+!$omp parallel do &
+!$omp private(i_x, psi_arr_y, phi_arr_y, mat_coeff_arr_y, vec_coeff_arr_y, diag_arr_y)
+do i_x = 1, nx
+   psi_arr_y(:) = psi_arr(i_x, :)
+
+   do i_y = 1, ny
+      diag_arr_y(i_y) = diag_cnst_y_dtau + diag_cnst_vy_dtau * potential_xyt(i_x, i_y, i_t)
+   end do
+
+   call tridiag_sym_cnst_odiag(diag_arr_y, sym_cnst_y_dtau, psi_arr_y, &
+	mat_coeff_arr_y, vec_coeff_arr_y, phi_arr_y)
+   psi_arr(i_x, :) = phi_arr_y(:) - psi_arr(i_x, :)
+end do
+!$omp end parallel do
+
+! Propagate dtau/2 using T_x for each yx
+!$omp parallel do &
+!$omp private(i_y, psi_arr_x, phi_arr_x, mat_coeff_arr_x, vec_coeff_arr_x)
+do i_y = 1, ny
+   psi_arr_x(:) = psi_arr(:, i_y)
+   call tridiag_sym_cnst(diag_cnst_x_dtau_2, sym_cnst_x_dtau_2, &
+	psi_arr_x, mat_coeff_arr_x, vec_coeff_arr_x, &
+	phi_arr_x)
+   psi_arr(:, i_y) = phi_arr_x(:) - psi_arr(:, i_y)
+end do
+!$omp end parallel do

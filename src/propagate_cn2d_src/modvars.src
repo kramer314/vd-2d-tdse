@@ -1,0 +1,16 @@
+complex(dp), allocatable :: diag_arr_y(:)
+
+complex(dp), allocatable :: phi_arr_x(:), phi_arr_y(:)
+complex(dp), allocatable :: psi_arr_x(:), psi_arr_y(:)
+
+complex(dp), allocatable :: mat_coeff_arr_x(:), mat_coeff_arr_y(:)
+complex(dp), allocatable :: vec_coeff_arr_x(:), vec_coeff_arr_y(:)
+
+complex(fp) :: sym_cnst_dtau, sym_cnst_dtau_2
+complex(fp) :: sym_cnst_x_dtau, sym_cnst_x_dtau_2
+complex(fp) :: sym_cnst_y_dtau, sym_cnst_y_dtau_2
+complex(fp) :: diag_cnst_x_dtau, diag_cnst_x_dtau_2
+complex(fp) :: diag_cnst_y_dtau, diag_cnst_y_dtau_2
+complex(fp) :: diag_cnst_vy_dtau
+
+complex(fp) :: dtau

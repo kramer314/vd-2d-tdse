@@ -1,0 +1,26 @@
+sym_cnst_dtau = - (j * hbar**2 * dtau) / (8.0_fp * m)
+sym_cnst_dtau_2 = sym_cnst_dtau / 2.0_fp
+
+sym_cnst_x_dtau = sym_cnst_dtau / dx**2
+sym_cnst_x_dtau_2 = sym_cnst_dtau_2 / dx **2
+
+sym_cnst_y_dtau = sym_cnst_dtau / dy**2
+sym_cnst_y_dtau_2 = sym_cnst_dtau_2 / dy **2
+
+diag_cnst_x_dtau = (0.5_fp - 2.0_dp * sym_cnst_x_dtau)
+diag_cnst_x_dtau_2 = (0.5_fp - 2.0_dp * sym_cnst_x_dtau_2)
+
+diag_cnst_y_dtau = (0.5_fp - 2.0_dp * sym_cnst_y_dtau)
+diag_cnst_y_dtau_2 = (0.5_fp - 2.0_dp * sym_cnst_y_dtau_2)
+
+diag_cnst_vy_dtau = j * dtau / 4.0_fp
+
+allocate(phi_arr_x(nx), phi_arr_y(ny))
+allocate(psi_arr_x(nx), psi_arr_y(ny))
+
+allocate(diag_arr_y(ny))
+
+allocate(mat_coeff_arr_x(nx - 1))
+allocate(mat_coeff_arr_y(ny - 1))
+allocate(vec_coeff_arr_x(nx))
+allocate(vec_coeff_arr_y(ny))

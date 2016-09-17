@@ -11,7 +11,8 @@ program main
   ! Imports -- program modules
   use progvars
   use setup, only: setup_init, setup_cleanup
-  use output, only: output_vd_counts, logfile_unit=>output_logfile_unit
+  use output, only: output_vd_counts, output_psi, &
+       logfile_unit=>output_logfile_unit
   use propagate, only: propagate_psi, propagate_psi_itime
   use propagate_cn2d_itime, only: propagate_cn2d_itime_converged
 
@@ -32,8 +33,6 @@ program main
 
   do while (.not. converged)
 
-     write(*,*) "itime", i_t
-
      !$omp parallel workshare
      old_psi_arr(:,:) = psi_arr(:,:)
      !$omp end parallel workshare
@@ -44,12 +43,16 @@ program main
         call wfmath_normalize(psi_arr, dgrid)
         call wfmath_normalize(old_psi_arr, dgrid)
 
+        call log_log_info("Imaginary timestep "//string_val(i_t), logfile_unit)
+
         converged = propagate_cn2d_itime_converged(psi_arr, old_psi_arr, 1e-17_fp)
      end if
 
      i_t = i_t + 1
 
   end do
+  call wfmath_normalize(psi_arr, dgrid)
+  call output_psi()
 
   call log_log_info("Beginning time propagation.", logfile_unit)
   do i_t = 1, nt

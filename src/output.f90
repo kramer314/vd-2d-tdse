@@ -19,8 +19,8 @@ module output
   public :: output_cleanup
 
   public :: output_vd_counts
-  public :: output_vd_residuals
-
+  public :: output_psi
+  
   public :: output_logfile_unit
 
   ! Output file unit numbers
@@ -28,10 +28,7 @@ module output
   integer(ip), parameter :: output_logfile_unit = logfile_unit
 
   integer(ip), parameter :: vd_p_unit = 98
-  integer(ip), parameter :: vd_resid_unit = 97
-  integer(ip), parameter :: vd_resid_cum_unit = 96
-  integer(ip), parameter :: vd_resid_analysis_unit = 95
-
+  integer(ip), parameter :: psi_unit = 97
 
 contains
   subroutine output_init()
@@ -39,11 +36,7 @@ contains
 
     open(unit=logfile_unit, file=trim(output_dir)//trim(log_fname))
     open(unit=vd_p_unit, file=trim(output_dir)//trim(vd_p_fname))
-    open(unit=vd_resid_unit, file=trim(output_dir)//trim(vd_resid_fname))
-    open(unit=vd_resid_cum_unit, &
-         file=trim(output_dir)//trim(vd_resid_cum_fname))
-    open(unit=vd_resid_analysis_unit, file=trim(output_dir)//&
-         trim(vd_resid_analysis_fname))
+    open(unit=psi_unit, file=trim(output_dir)//trim(psi_ground_fname))
 
   end subroutine output_init
 
@@ -52,9 +45,6 @@ contains
 
     close(unit=logfile_unit)
     close(unit=vd_p_unit)
-    close(unit=vd_resid_unit)
-    close(unit=vd_resid_cum_unit)
-    close(unit=vd_resid_analysis_unit)
 
   end subroutine output_cleanup
 
@@ -71,19 +61,17 @@ contains
 
   end subroutine output_vd_counts
 
-  subroutine output_vd_residuals()
-    ! Output virtual detector residual comparisons
-    integer(ip) :: i_py
+  subroutine output_psi()
+    ! Output abs(psi(x, y, t))**2 at the current time index
 
-    call log_log_info("Writing out VD residuals", logfile_unit)
+    integer(ip) :: i_y
 
-    do i_py = 1, vd_npy
-       write(vd_resid_unit, "("//string_val(vd_npx)//fp_format_raw//")") &
-            resid_np_arr(:, i_py)
-       write(vd_resid_cum_unit, "("//string_val(vd_npx)//fp_format_raw//")") &
-            resid_np_cum_arr(:, i_py)
+    call log_log_info("Writing out abs(psi(x, y, t))^2", logfile_unit)
+
+    do i_y = 1, ny
+       write(psi_unit, "("//string_val(nx)//fp_format_raw//")") &
+            abs(psi_arr(:, i_y))**2
     end do
-
-  end subroutine output_vd_residuals
+  end subroutine output_psi
 
 end module output

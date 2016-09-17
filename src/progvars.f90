@@ -79,25 +79,11 @@ module progvars
   character(:), allocatable :: output_dir
   character(:), allocatable :: log_fname
   character(:), allocatable :: vd_p_fname
-  character(:), allocatable :: vd_resid_fname
-  character(:), allocatable :: vd_resid_cum_fname
-  character(:), allocatable :: vd_resid_analysis_fname
-
-  ! Residual analysis parameters
-  real(fp) :: resid_p_eps
-
-  ! Residual analysis variables
-  real(fp) :: resid_mean, resid_var
-  real(fp) :: resid_mean_sq_err, resid_mean_abs_err
-  real(fp) :: resid_fivenum_arr(5)
+  character(:), allocatable :: psi_ground_fname
 
   ! Arrays
   real(fp), allocatable :: x_range(:), y_range(:), t_range(:)
   complex(fp), allocatable :: psi_arr(:,:), old_psi_arr(:,:)
-
-  real(fp), allocatable :: theor_np_arr(:,:), resid_np_arr(:,:)
-  real(fp), allocatable :: resid_np_cum_arr(:,:)
-  logical, allocatable :: resid_np_mask(:,:)
 
 contains
 
@@ -134,15 +120,11 @@ contains
   subroutine progvars_allocate_arrays()
     allocate(psi_arr(nx, ny))
     allocate(old_psi_arr(nx, ny))
-    
+
     allocate(t_range(nt))
     allocate(x_range(nx))
     allocate(y_range(ny))
 
-    allocate(theor_np_arr(vd_npx, vd_npy))
-    allocate(resid_np_arr(vd_npx, vd_npy))
-    allocate(resid_np_cum_arr(vd_npx, vd_npy))
-    allocate(resid_np_mask(vd_npx, vd_npy))
   end subroutine progvars_allocate_arrays
 
   subroutine progvars_deallocate_arrays()
@@ -152,19 +134,13 @@ contains
     deallocate(psi_arr)
     deallocate(old_psi_arr)
 
-    deallocate(theor_np_arr)
-    deallocate(resid_np_arr)
-    deallocate(resid_np_cum_arr)
-    deallocate(resid_np_mask)
   end subroutine progvars_deallocate_arrays
 
   subroutine progvars_deallocate_params
     deallocate(output_dir)
     deallocate(log_fname)
     deallocate(vd_p_fname)
-    deallocate(vd_resid_fname)
-    deallocate(vd_resid_cum_fname)
-    deallocate(vd_resid_analysis_fname)
+    deallocate(psi_ground_fname)
   end subroutine progvars_deallocate_params
 
   subroutine progvars_set_arrays()
@@ -228,15 +204,10 @@ contains
 
     call config_get_param("vd_disjoint", vd_disjoint, success)
 
-    call config_get_param("resid_p_eps", resid_p_eps, success)
-
     call config_get_param("output_dir", output_dir, success)
     call config_get_param("log_fname", log_fname, success)
     call config_get_param("vd_p_fname", vd_p_fname, success)
-    call config_get_param("vd_resid_fname", vd_resid_fname, success)
-    call config_get_param("vd_resid_cum_fname", vd_resid_cum_fname, success)
-    call config_get_param("vd_resid_analysis_fname", vd_resid_analysis_fname, &
-         success)
+    call config_get_param("psi_ground_fname", psi_ground_fname, success)
 
     call config_get_param("print_mod_x", print_mod_x, success)
     call config_get_param("print_mod_y", print_mod_y, success)

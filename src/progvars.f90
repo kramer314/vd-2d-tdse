@@ -27,6 +27,14 @@ module progvars
   ! Particle parameters
   real(fp) :: m
 
+  ! Soft-core Coulomb s
+  real(fp)  :: sc_coulomb_depth, sc_coulomb_offset
+  real(fp) :: sc_coulomb_x0, sc_coulomb_y0
+
+  ! Quartic gobbler (negative imaginary) potential s
+  real(fp) :: gobbler_width_x, gobbler_width_y
+  real(fp) :: gobbler_strength_x, gobbler_strength_y
+
   ! Gaussian parameters
   real(fp) :: p0_x, sig_x, x0
   real(fp) :: p0_y, sig_y, y0
@@ -72,6 +80,7 @@ module progvars
   ! Time grid parameters
   real(fp) :: t_min, t_max, dt
   integer(ip) :: nt
+  integer(ip) :: min_iter_itime
 
   ! Output parameters
   integer(ip) :: print_mod_x, print_mod_y, print_mod_t
@@ -158,6 +167,16 @@ contains
 
     call config_get_param("m", m, success)
 
+    call config_get_param("sc_coulomb_depth", sc_coulomb_depth, success)
+    call config_get_param("sc_coulomb_offset", sc_coulomb_offset, success)
+    call config_get_param("sc_coulomb_x0", sc_coulomb_x0, success)
+    call config_get_param("sc_coulomb_y0", sc_coulomb_y0, success)
+
+    call config_get_param("gobbler_width_x", gobbler_width_x, success)
+    call config_get_param("gobbler_width_y", gobbler_width_y, success)
+    call config_get_param("gobbler_strength_x", gobbler_strength_x, success)
+    call config_get_param("gobbler_strength_y", gobbler_strength_y, success)
+
     call config_get_param("p0_x", p0_x, success)
     call config_get_param("x0", x0, success)
     call config_get_param("sig_x", sig_x, success)
@@ -177,6 +196,8 @@ contains
     call config_get_param("t_min", t_min, success)
     call config_get_param("t_max", t_max, success)
     call config_get_param("nt", nt, success)
+
+    call config_get_param("min_iter_itime", min_iter_itime, success)
 
     call config_get_param("nxl_external", nxl_external, success)
     call config_get_param("nxr_external", nxr_external, success)

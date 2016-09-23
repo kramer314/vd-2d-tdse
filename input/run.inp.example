@@ -6,13 +6,25 @@ hbar = 1.0
 ! Particle parameters
 m = 1.0
 
+! Soft-core Coulomb parameters
+sc_coulomb_depth = 10.0
+sc_coulomb_offset = 1.0
+sc_coulomb_x0 = 20.0
+sc_coulomb_y0 = -20.0
+
+! Gobbler potential parameters
+gobbler_width_x = 10.0
+gobbler_width_y = 10.0
+gobbler_strength_x = 10.0
+gobbler_strength_y = 10.0
+
 ! Gaussian parameters
 p0_x = 4.5
 p0_y = 5.5
 x0 = 0.0
 y0 = 0.0
-sig_x = 1.0
-sig_y = 1.5
+sig_x = 5.0
+sig_y = 5.0
 
 ! Spatial grid parameters
 x_min = -50.0
@@ -25,8 +37,11 @@ ny = 2000
 
 ! Temporal grid parameters
 t_min = 0.0
-t_max = 5.0
-nt = 1000
+t_max = 10.0
+nt = 250
+
+! Minimum imaginary time iterations
+min_iter_itime = 50
 
 ! Virtual detector grid parameters
 ! # of points outside interaction region
@@ -74,10 +89,9 @@ resid_p_eps = 1.0E-4
 ! Output parameters
 output_dir = ./output/
 log_fname = run.log
-psi_xt_fname = psi_xt.dat
 vd_p_fname = vd_px.dat
 psi_ground_fname = psi_ground.dat
 
-print_mod_x = 50
-print_mod_y = 50
+print_mod_x = 10
+print_mod_y = 10
 print_mod_t = 10

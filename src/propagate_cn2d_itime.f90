@@ -9,7 +9,7 @@ module propagate_cn2d_itime
 
   include "./propagate_cn2d_src/modvars.src"
 
-  Public :: propagate_cn2d_itime_init
+  public :: propagate_cn2d_itime_init
   public :: propagate_cn2d_itime_cleanup
   public :: propagate_cn2d_itime_splitop
   public :: propagate_cn2d_itime_converged
@@ -29,9 +29,10 @@ contains
     include "./propagate_cn2d_src/cleanup.src"
   end subroutine propagate_cn2d_itime_cleanup
 
-  subroutine propagate_cn2d_itime_splitop(psi_arr, i_t)
+  subroutine propagate_cn2d_itime_splitop(psi_arr)
     complex(dp), intent(inout) :: psi_arr(:,:)
-    integer(ip), intent(in) :: i_t
+
+    integer(ip), parameter :: i_t = 0_ip
 
     include "./propagate_cn2d_src/splitop.src"
 

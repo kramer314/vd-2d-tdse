@@ -49,11 +49,10 @@ contains
     call propagate_cn2d_itime_cleanup()
   end subroutine propagate_cleanup
 
-  subroutine propagate_psi_itime(psi_arr, i_t)
+  subroutine propagate_psi_itime(psi_arr)
     complex(fp), intent(inout) :: psi_arr(:,:)
-    integer(ip), intent(in) :: i_t
 
-    call propagate_cn2d_itime_splitop(psi_arr, i_t)
+    call propagate_cn2d_itime_splitop(psi_arr)
 
   end subroutine propagate_psi_itime
 

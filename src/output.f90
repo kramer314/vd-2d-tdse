@@ -10,6 +10,7 @@ module output
 
   ! Imports -- program modules
   use progvars
+  use potential, only: potential_xyt
 
   implicit none
 
@@ -20,7 +21,8 @@ module output
 
   public :: output_vd_counts
   public :: output_psi
-  
+  public :: output_potential
+
   public :: output_logfile_unit
 
   ! Output file unit numbers
@@ -28,7 +30,6 @@ module output
   integer(ip), parameter :: output_logfile_unit = logfile_unit
 
   integer(ip), parameter :: vd_p_unit = 98
-  integer(ip), parameter :: psi_unit = 97
 
 contains
   subroutine output_init()
@@ -36,7 +37,6 @@ contains
 
     open(unit=logfile_unit, file=trim(output_dir)//trim(log_fname))
     open(unit=vd_p_unit, file=trim(output_dir)//trim(vd_p_fname))
-    open(unit=psi_unit, file=trim(output_dir)//trim(psi_ground_fname))
 
   end subroutine output_init
 
@@ -61,17 +61,72 @@ contains
 
   end subroutine output_vd_counts
 
-  subroutine output_psi()
+  subroutine output_psi(fname, out_dir)
     ! Output abs(psi(x, y, t))**2 at the current time index
 
-    integer(ip) :: i_y
+    character(:), allocatable, intent(in) :: fname
+    character(:), allocatable, intent(in), optional :: out_dir
 
-    call log_log_info("Writing out abs(psi(x, y, t))^2", logfile_unit)
+    character(:), allocatable :: path
 
-    do i_y = 1, ny
-       write(psi_unit, "("//string_val(nx)//fp_format_raw//")") &
-            abs(psi_arr(:, i_y))**2
+    integer(ip) :: unit
+    integer(ip) :: i_x, i_y
+
+    if (present(out_dir)) then
+       path = trim(out_dir)//trim(fname)
+    else
+       path = trim(output_dir)//trim(fname)
+    end if
+
+    open(newunit=unit, file=path)
+
+    call log_log_info("Writing out abs(psi(x, y, t))^2 to "//path, &
+         logfile_unit)
+
+    do i_y = 1, ny / print_mod_y
+       do i_x = 1, nx / print_mod_x
+          write(unit, "("//string_val(nx)//fp_format_raw//")", advance="no") &
+               abs(psi_arr(i_x * print_mod_x, i_y * print_mod_y))**2
+       end do
+       write(unit, *)
     end do
+
+    close(unit)
+
   end subroutine output_psi
+
+  subroutine output_potential(i_t, fname, out_dir)
+    ! Output abs(psi(x, y, t))**2 at the current time index
+
+    integer, intent(in) :: i_t
+    character(:), allocatable, intent(in) :: fname
+    character(:), allocatable, intent(in), optional :: out_dir
+
+    character(:), allocatable :: path
+
+    integer(ip) :: unit
+    integer(ip) :: i_x, i_y
+
+    if (present(out_dir)) then
+       path = trim(out_dir)//trim(fname)
+    else
+       path = trim(output_dir)//trim(fname)
+    end if
+
+    open(newunit=unit, file=path)
+
+    call log_log_info("Writing out V(x, y, t) to "//path, logfile_unit)
+
+    do i_y = 1, ny / print_mod_y
+       do i_x = 1, nx / print_mod_x
+          write(unit, "("//string_val(nx)//fp_format_raw//")", advance="no") &
+               real(potential_xyt(i_x * print_mod_x, i_y * print_mod_y, i_t))
+       end do
+       write(unit, *)
+    end do
+
+    close(unit)
+
+  end subroutine output_potential
 
 end module output

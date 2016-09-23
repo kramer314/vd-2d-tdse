@@ -11,7 +11,7 @@ program main
   ! Imports -- program modules
   use progvars
   use setup, only: setup_init, setup_cleanup
-  use output, only: output_vd_counts, output_psi, &
+  use output, only: output_vd_counts, output_psi, output_potential, &
        logfile_unit=>output_logfile_unit
   use propagate, only: propagate_psi, propagate_psi_itime
   use propagate_cn2d_itime, only: propagate_cn2d_itime_converged
@@ -28,31 +28,40 @@ program main
   call log_log_info("Beginning imaginary time propagation.", logfile_unit)
 
   converged = .false.
-
   i_t = 1_ip
+
+  !$omp parallel workshare
+  old_psi_arr(:,:) = psi_arr(:,:)
+  !$omp end parallel workshare
 
   do while (.not. converged)
 
-     !$omp parallel workshare
-     old_psi_arr(:,:) = psi_arr(:,:)
-     !$omp end parallel workshare
+     call propagate_psi_itime(psi_arr)
 
-     call propagate_psi_itime(psi_arr, 1_ip)
-
-     if (mod(i_t, 10_ip) .eq. 0) then
-        call wfmath_normalize(psi_arr, dgrid)
-        call wfmath_normalize(old_psi_arr, dgrid)
+     if (mod(i_t, print_mod_t) .eq. 0) then
 
         call log_log_info("Imaginary timestep "//string_val(i_t), logfile_unit)
 
-        converged = propagate_cn2d_itime_converged(psi_arr, old_psi_arr, 1e-17_fp)
+        call wfmath_normalize(psi_arr, dgrid)
+
+        if (i_t .gt. min_iter_itime) then
+
+           converged = propagate_cn2d_itime_converged(psi_arr, old_psi_arr, epsilon(1.0_fp))
+
+           !$omp parallel workshare
+           old_psi_arr(:,:) = psi_arr(:,:)
+           !$omp end parallel workshare
+        end if
+
      end if
 
      i_t = i_t + 1
 
   end do
-  call wfmath_normalize(psi_arr, dgrid)
-  call output_psi()
+
+  call output_psi(psi_ground_fname)
+
+  call log_log_info("Imaginary time propagation complete.", logfile_unit)
 
   call log_log_info("Beginning time propagation.", logfile_unit)
   do i_t = 1, nt
@@ -63,6 +72,7 @@ program main
      if (mod(i_t, print_mod_t) .eq. 0) then
         call log_log_info("Timestep "//string_val(i_t)//" of "// &
              string_val(nt), logfile_unit)
+        write(*,*) wfmath_norm(psi_arr, dgrid)
      end if
 
   end do

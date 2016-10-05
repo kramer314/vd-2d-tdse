@@ -53,6 +53,11 @@ External libraries to build from source (build scripts included):
   Note that this library is still in beta status; always use the latest
   version.
 
+* Atomic units library, available at:
+  https://github.com/kramer314/au-units
+  Note that this library is still in beta status; always use the latest
+  version.
+
 Recommended Dependencies
 ========================
 * OpenMP library (most recently tested on GCC OpenMP 5.3)
@@ -82,7 +87,8 @@ symlinks as follows:
 
     ln -s /path/to/fortran-lib-project ./deps/fortran-lib
     ln -s /path/to/tridiag-matrix-project ./deps/tridiag
-    ln -s /path/to/wfmath ./deps/wfmath
+    ln -s /path/to/wfmath-project ./deps/wfmath
+    ln -s /path/to/au-units-project ./deps/au-units
 
 Note that this is a link to the project directory itself, *not* the directory
 where the build folder where the compiled library is actually located. These

@@ -6,6 +6,7 @@ depsdir="./deps/"
 flibdir=${depsdir}"fortran-lib/"
 tridiagdir=${depsdir}"tridiag/"
 wfmathdir=${depsdir}"wfmath/"
+auunitsdir=${depsdir}"au-units/"
 
 threads=1
 
@@ -83,11 +84,22 @@ function build {
     popd > $devnull
     echo ""
 
-    echo "Dependency build complete; check log above for any build errors."
+    # Pull and build atomic units library
+    echo "Updating atomic units library source"
+    echo "------------------------------------"
+    git -C $auunitsdir pull origin master || git clone https://github.com/kramer314/au-units.git $auunitsdir
     echo ""
 
-}
+    echo "Building atomic units library"
+    echo "-----------------------------"
+    pushd $auunitsdir > $devnull
+    scons -j $threads
+    popd > $devnull
+    echo ""
 
+    echo "Dependency build complete; check log above for any build errors."
+    echo ""
+}
 
 # Parse arguments
 if [ -z "$1" ]; then

@@ -17,9 +17,60 @@ contains
 
     if (i_t > 0_ip) then
        val = val + potential_gobbler_quartic_2d(i_x, i_y)
+       val = val + potential_sin2_pulse_2d(i_x, i_y, i_t)
     end if
 
   end function potential_xyt
+
+  pure real(fp) function potential_sin2_pulse_2d(i_x, i_y, i_t) result(val)
+    integer(ip), intent(in) :: i_x, i_y, i_t
+
+    real(fp) :: x, y, t
+
+    real(fp) :: env, pol, int
+    real(fp) :: t_ramp, t_plat, t_c
+    real(fp) :: phi, omega
+
+    real(fp) :: pulse
+
+    x = x_range(i_x)
+    y = y_range(i_y)
+    t = t_range(i_t)
+
+    int = pulse_intensity
+    t_ramp = pulse_t_ramp
+    t_plat = pulse_t_plateau
+
+    phi = pulse_phi
+    omega = pulse_omega
+
+    ! Pulse envelope
+    if (t .lt. t_ramp) then
+       ! sin^2 envelope on up ramp
+       env = sin(pi / 2.0_fp * t / t_ramp)**2
+    else if (t .ge. t_ramp .and. t .le. t_ramp + t_plat) then
+       ! constant envelope on plateau
+       env = 1.0_fp
+    else if (t .gt. t_ramp + t_plat .and. t .le. 2 * t_ramp + t_plat) then
+       ! sin^2 envelope on down ramp
+       env = sin(pi / 2.0_fp * (t - t_plat)/t_ramp)**2
+    else
+       env = 0.0_fp
+    end if
+
+    ! Right circular polarization
+    pol = 1.0_fp
+
+    t_c = t_ramp + t_plat / 2.0_fp
+
+    pulse = env * sqrt(int)
+
+    ! Dipole approximation: V = -q \vec{r} \dot \vec{E(t)}
+    ! Here, q = -q_e
+    val = pulse * ( x * cos(omega * (t - t_c) + pulse_phi) + &
+         y * sin(omega * (t - t_c) + pulse_phi) )
+
+  end function potential_sin2_pulse_2d
 
   pure real(fp) function potential_sc_coulomb_2d(i_x, i_y) result(val)
     integer(ip), intent(in) :: i_x, i_y

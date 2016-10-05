@@ -1,5 +1,5 @@
 integer(ip) :: i_x, i_y
-
+	    
 ! Propagate dtau/2 using T_x for each y
 !$omp parallel do &
 !$omp private(i_y, psi_arr_x, phi_arr_x, mat_coeff_arr_x, vec_coeff_arr_x)

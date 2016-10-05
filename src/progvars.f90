@@ -8,6 +8,7 @@ module progvars
   use globvars, only: pi_dp, e_dp, j_dp
   use config, only: config_get_param
   use numerics, only: numerics_linspace
+  use au_cnsts, only: me_dp ,qe_dp, hbar_dp
 
   ! Imports -- program modules
   use precision
@@ -21,19 +22,24 @@ module progvars
   real(fp), parameter :: e = real(e_dp, kind=fp)
   complex(fp), parameter :: j = cmplx(j_dp, kind=fp)
 
-  ! Units
-  real(fp) :: hbar
+  ! Units (au)
+  real(fp), parameter :: hbar = real(hbar_dp, kind=fp)
+  
+  ! Particle parameters :: electron
+  real(fp), parameter :: m = real(me_dp, kind=fp)
+  real(fp), parameter :: q = real(qe_dp, kind=fp)  
 
-  ! Particle parameters
-  real(fp) :: m
-
-  ! Soft-core Coulomb s
+  ! Soft-core Coulomb potential
   real(fp)  :: sc_coulomb_depth, sc_coulomb_offset
   real(fp) :: sc_coulomb_x0, sc_coulomb_y0
 
-  ! Quartic gobbler (negative imaginary) potential s
+  ! Quartic gobbler (negative imaginary) potential
   real(fp) :: gobbler_width_x, gobbler_width_y
   real(fp) :: gobbler_strength_x, gobbler_strength_y
+
+  ! sin^2 pulse ramp
+  real(fp) :: pulse_t_ramp, pulse_t_plateau
+  real(fp) :: pulse_omega, pulse_intensity, pulse_phi
 
   ! Gaussian parameters
   real(fp) :: p0_x, sig_x, x0
@@ -163,10 +169,6 @@ contains
     ! Read in parameters from input file
     logical :: success
 
-    call config_get_param("hbar", hbar, success)
-
-    call config_get_param("m", m, success)
-
     call config_get_param("sc_coulomb_depth", sc_coulomb_depth, success)
     call config_get_param("sc_coulomb_offset", sc_coulomb_offset, success)
     call config_get_param("sc_coulomb_x0", sc_coulomb_x0, success)
@@ -176,6 +178,12 @@ contains
     call config_get_param("gobbler_width_y", gobbler_width_y, success)
     call config_get_param("gobbler_strength_x", gobbler_strength_x, success)
     call config_get_param("gobbler_strength_y", gobbler_strength_y, success)
+
+    call config_get_param("pulse_t_ramp", pulse_t_ramp, success)
+    call config_get_param("pulse_t_plateau", pulse_t_plateau, success)
+    call config_get_param("pulse_intensity", pulse_intensity, success)
+    call config_get_param("pulse_omega", pulse_omega, success)
+    call config_get_param("pulse_phi", pulse_phi, success)    
 
     call config_get_param("p0_x", p0_x, success)
     call config_get_param("x0", x0, success)

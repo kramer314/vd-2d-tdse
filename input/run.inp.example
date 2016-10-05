@@ -1,11 +1,5 @@
 ! Example input file
 
-! Units
-hbar = 1.0
-
-! Particle parameters
-m = 1.0
-
 ! Soft-core Coulomb parameters
 sc_coulomb_depth = 10.0
 sc_coulomb_offset = 1.0
@@ -17,6 +11,13 @@ gobbler_width_x = 10.0
 gobbler_width_y = 10.0
 gobbler_strength_x = 10.0
 gobbler_strength_y = 10.0
+
+! Sin^2 ramped pulse parameters
+pulse_t_ramp = 1.0
+pulse_t_plateau = 1.0
+pulse_intensity = 0.0
+pulse_omega = 0.0
+pulse_phi = 0.0
 
 ! Gaussian parameters
 p0_x = 4.5

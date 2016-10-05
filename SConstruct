@@ -18,8 +18,9 @@ source_dir = root_dir + "src/"
 build_dir = root_dir + "build/"
 deps_dir = root_dir + "deps/"
 
-libs = ["flib", "tridiag", "wfmath"]
-lib_path = [deps_dir + "fortran-lib/build/", deps_dir + "tridiag/build", deps_dir + "wfmath/build"]
+libs = ["flib", "tridiag", "wfmath", "au_units"]
+lib_path = [deps_dir + "fortran-lib/build/", deps_dir + "tridiag/build",
+    deps_dir + "wfmath/build", deps_dir + "au-units/build"]
 
 env = DefaultEnvironment(ENV = os.environ, TOOLS = ['default', "gfortran"])
 

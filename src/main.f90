@@ -72,7 +72,6 @@ program main
      if (mod(i_t, print_mod_t) .eq. 0) then
         call log_log_info("Timestep "//string_val(i_t)//" of "// &
              string_val(nt), logfile_unit)
-        write(*,*) wfmath_norm(psi_arr, dgrid)
      end if
 
   end do

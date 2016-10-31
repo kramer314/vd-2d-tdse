@@ -1,50 +1,77 @@
 # Copyright (c) 2016 Alex Kramer <kramer.alex.kramer@gmail.com>
 # See the LICENSE.txt file at the top-level directory of this distribution.
 
+# Flag to specify custom build configuration
+AddOption("--config-json", dest="config_json_fname", default="./config_json.default")
+
+
+# Standard library imports
 import os
+import json
 
-# Uncomment to have SCons handle updating and building dependencies as well.
-# if GetOption("clean"):
-#     os.system("./make_deps.sh --clean")
-# else:
-#     n_jobs = GetOption("num_jobs")
-#     os.system("./make_deps.sh -j " + str(n_jobs))
 
-def absdir(path):
+# Helper functions
+def abspath(path):
     return os.path.abspath(path) + "/"
 
-root_dir = absdir("./")
-source_dir = root_dir + "src/"
-build_dir = root_dir + "build/"
-deps_dir = root_dir + "deps/"
 
-libs = ["flib", "tridiag", "wfmath", "au_units"]
-lib_path = [deps_dir + "fortran-lib/build/", deps_dir + "tridiag/build",
-    deps_dir + "wfmath/build", deps_dir + "au-units/build"]
+# Parse build configuration from JSON
+config_json_fname = GetOption("config_json_fname")
+config_json_f = open(config_json_fname, "r")
+config_json = json.load(config_json_f)
+config_json_f.close()
 
+
+# Extract source and build directories
+source_dir = abspath(config_json["src_path"])
+build_dir = abspath(config_json["build_path"])
+
+
+# Extract library names and paths
+lib_names = []
+lib_paths = []
+lib_path_root = config_json["lib_path_root"]
+libs_dict = config_json["libs"]
+
+for lib in libs_dict:
+  lib_names.append(lib["name"])
+
+  lib_path = lib["path"]
+
+  if (lib["use_root"]):
+    lib_path = lib_path_root + lib_path
+
+  lib_paths.append(abspath(lib_path))
+
+
+# Extract compiler flags
+flags = ""
+
+debug = bool(config_json["debug"])
+
+flags_dict = config_json["flags"]
+
+for flag_cat, flag_params in flags_dict.items():
+    flag_list = flag_params["list"]
+    if (debug and bool(flag_params["debug"])) or (not debug and bool(flag_params["prod"])):
+        flags += " ".join(flag for flag in flag_list) + " "
+
+
+# Begin build
 env = DefaultEnvironment(ENV = os.environ, TOOLS = ['default', "gfortran"])
-
-IEEE_flags = "-fno-unsafe-math-optimizations -frounding-math -fsignaling-nans "
-general_flags = "-frecursive "
-openmp_flags = "-fopenmp "
-debug_flags = "-Og -g3 -Wall -Wextra -Wconversion -Wunused-parameter " + \
-    "-pedantic -std=f2008 -fcheck=all -fbacktrace "
-prod_flags = "-O3 -march=native -fexternal-blas -lblas "
-
-flags = general_flags + IEEE_flags + openmp_flags + debug_flags
-flags = general_flags + IEEE_flags + openmp_flags + prod_flags
 
 env.Replace(F90FLAGS = flags)
 env.Replace(LINKFLAGS = flags)
 env.Replace(FORTRANMODDIRPREFIX = "-J ")
 env.Replace(FORTRANMODDIR = build_dir)
-env.Replace(F90PATH = [lib_path, build_dir])
+env.Replace(F90PATH = [lib_paths, build_dir])
 
 Export("env")
-Export("libs")
-Export("lib_path")
+Export("lib_names")
+Export("lib_paths")
 
 SConscript(source_dir+"SConscript", variant_dir=build_dir, duplicate=1)
+
 
 # For whatever reason, we can't use duplicate=0 and have *.mod files in the
 # build directory. But, if we duplicate the source tree into the build

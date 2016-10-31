@@ -2,9 +2,9 @@
 # See the LICENSE.txt file at the top-level of this distribution.
 
 Import("env")
-Import("libs")
-Import("lib_path")
+Import("lib_names")
+Import("lib_paths")
 
 sources = Glob("*.f90")
 
-env.Program("main.x", sources, LIBS=libs, LIBPATH=lib_path)
+env.Program("main.x", sources, LIBS=lib_names, LIBPATH=lib_paths)
